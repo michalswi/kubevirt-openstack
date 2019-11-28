@@ -1,0 +1,62 @@
+apiVersion: kubevirt.io/v1alpha3
+kind: VirtualMachine
+metadata:
+  # 'name' and 'vm' should be equal
+  labels:
+    kubevirt.io/vm: testvm
+  name: testvm
+spec:
+  running: false
+  dataVolumeTemplates:
+    - metadata:
+        name: centos7-dv
+      spec:
+        pvc:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+        source:
+          http:
+            # https://cloud.centos.org/centos/7/images/
+            url: "https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-datavolume
+    spec:
+      domain:
+        cpu:
+          cores: 1
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: datavolume
+          - disk:
+              bus: virtio
+            name: cloudinitdisk            
+        machine:
+          type: ""            
+        resources:
+          requests:
+            memory: 1Gi
+      volumes:
+      - dataVolume:
+          name: centos7-dv
+        name: datavolume
+      - name: cloudinitdisk
+        # related to cloud-init >> /etc/cloud/cloud.cfg
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            # ssh root access + PasswordAuthentication
+            disable_root: false
+            ssh_pwauth: True
+            # password for default user 'centos':
+            password: password
+            chpasswd: { expire: False }
+            # your SSH_PUB_KEY here:
+            ssh_authorized_keys:
+            - ssh-rsa YOUR_SSH_PUB_KEY

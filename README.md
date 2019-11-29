@@ -8,9 +8,9 @@ K8s StorageClass - openstack **Cinder**
 
 
 ### Tools
-- kubevirt v0.23.0
+- kubevirt **v0.23.0**
 - virtctl 
-- kubectl (+kubeconfig)
+- kubectl **v1.14.6**
 
 
 ### Deployment
